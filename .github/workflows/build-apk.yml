@@ -24,9 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
-    env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx5g -Dfile.encoding=UTF-8"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,15 +33,23 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
           df -h
 
-      - name: Set up JDK 11
+      # Step 1: SDK Manager ke liye Java 17
+      - name: Set up Java 17 for SDK Tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK & NDK
+        uses: android-actions/setup-android@v3
+
+      # Step 2: Gradle build ke liye Java 11
+      - name: Set up Java 11 for Gradle Build
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "11"
           cache: gradle
-
-      - name: Set up Android NDK & SDK
-        uses: android-actions/setup-android@v3
 
       - name: Inject Telegram API credentials
         env:
@@ -63,12 +68,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # Step 3: Gradle ko explicitly Java 11 path dekar compile karna
       - name: Build APK
         run: |
           TASK="${{ github.event.inputs.gradle_task }}"
           TASK="${TASK:-:TMessagesProj_App:assembleAfatDebug}"
           echo "Running: ./gradlew $TASK"
-          ./gradlew $TASK --stacktrace --no-daemon
+          ./gradlew $TASK -Dorg.gradle.java.home="$JAVA_HOME" --stacktrace --no-daemon
 
       - name: List built APKs
         run: find . -name "*.apk" -path "*build/outputs*" -exec ls -lh {} \;
