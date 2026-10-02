@@ -54,11 +54,12 @@ jobs:
           echo "Using NDK $NDK_VERSION"
           echo "NDK_VERSION=$NDK_VERSION" >> "$GITHUB_ENV"
 
+          # sdkmanager needs JDK 17; the rest of the build stays on JDK 11
+          export JAVA_HOME="$JAVA_HOME_17_X64"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" "ndk;$NDK_VERSION" "cmake;$CMAKE_VERSION"
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
-
       - name: Inject Telegram API credentials
         env:
           TG_APP_ID: ${{ secrets.TG_APP_ID }}
