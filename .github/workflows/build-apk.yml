@@ -10,7 +10,7 @@ on:
       gradle_task:
         description: "Gradle task to run"
         required: false
-        default: ":TMessagesProj_App:assembleAfatDebug"
+        default: ":TMessagesProj:assembleAfatDebug"
 
 permissions:
   contents: read
@@ -81,7 +81,7 @@ jobs:
       - name: Build APK
         run: |
           TASK="${{ github.event.inputs.gradle_task }}"
-          TASK="${TASK:-:TMessagesProj_App:assembleAfatDebug}"
+          TASK="${TASK:-:TMessagesProj:assembleAfatDebug}"
           echo "Running: ./gradlew $TASK"
           ./gradlew $TASK --stacktrace --no-daemon
 
@@ -96,3 +96,4 @@ jobs:
             **/build/outputs/apk/**/*.apk
           if-no-files-found: error
           retention-days: 14
+          
