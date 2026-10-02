@@ -40,10 +40,13 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # Step 2: Fix - Purana 'tools' package hata diya gaya hai
       - name: Set up Android SDK & NDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools build-tools;34.0.0'
 
-      # Step 2: Gradle build ke liye Java 11
+      # Step 3: Gradle build ke liye Java 11
       - name: Set up Java 11 for Gradle Build
         uses: actions/setup-java@v4
         with:
@@ -68,7 +71,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # Step 3: Gradle ko explicitly Java 11 path dekar compile karna
+      # Step 4: Gradle build command
       - name: Build APK
         run: |
           TASK="${{ github.event.inputs.gradle_task }}"
